@@ -5,6 +5,7 @@ export type Post = {
   content: string;
   author?: number;
   author_username: string;
+  author_avatar: string | null;
   view_count: number;
   featured_img: string | null;
   short_code: string | null;
@@ -28,6 +29,7 @@ export type Comment = {
   author: CommentAuthor;
   parent: number | null;
   content: string;
+  author_avatar?: string | null;
   created_at: string;
   reply_count?: number;
   replies?: Comment[];
