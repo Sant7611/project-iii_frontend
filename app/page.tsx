@@ -6,7 +6,7 @@ import { PersonalizedFeed } from "@/components/personalized-feed";
 import { getPosts } from "@/lib/api";
 
 export const metadata: Metadata = {
-  title: "Quillora — Ideas worth reading",
+  title: "TFacts — Ideas worth reading",
   description: "Discover thoughtful blog posts with relevance search, personalized recommendations, likes, comments, saves, and community publishing.",
 };
 
@@ -39,7 +39,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {!available && <div className="notice">The Django API is currently unreachable. Quillora will populate automatically when the backend is running.</div>}
+      {!available && <div className="notice">The Django API is currently unreachable. TFacts will populate automatically when the backend is running.</div>}
 
       {featured && (
         <section className="section">
