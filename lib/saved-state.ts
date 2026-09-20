@@ -1,7 +1,7 @@
 "use client";
 
 import { API_URL } from "./api";
-import { authenticatedFetch } from "./auth";
+import { authenticatedFetch, getStoredUser } from "./auth";
 
 type SavedRecord = {
   id: number;
@@ -9,6 +9,7 @@ type SavedRecord = {
 };
 
 let cache: Map<number, number> | null = null;
+let cachedUserId: number | null = null;
 let loading: Promise<Map<number, number>> | null = null;
 
 function recordsFromPayload(payload: unknown): SavedRecord[] {
@@ -38,7 +39,19 @@ function toMap(records: SavedRecord[]): Map<number, number> {
   return map;
 }
 
+function syncCacheOwner(): number | null {
+  const userId = getStoredUser()?.id ?? null;
+  if (cachedUserId !== userId) {
+    cache = null;
+    loading = null;
+    cachedUserId = userId;
+  }
+  return userId;
+}
+
 export async function loadSavedState(): Promise<Map<number, number>> {
+  const userId = syncCacheOwner();
+  if (!userId) return new Map<number, number>();
   if (cache) return cache;
   if (loading) return loading;
 
@@ -60,14 +73,17 @@ export async function loadSavedState(): Promise<Map<number, number>> {
 }
 
 export function rememberSavedPost(postId: number, savedId: number): void {
+  syncCacheOwner();
   if (!cache) cache = new Map();
   cache.set(postId, savedId);
 }
 
 export function forgetSavedPost(postId: number): void {
+  syncCacheOwner();
   cache?.delete(postId);
 }
 
 export function getSavedRecordId(postId: number): number | undefined {
+  syncCacheOwner();
   return cache?.get(postId);
 }
