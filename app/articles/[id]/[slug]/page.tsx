@@ -8,6 +8,7 @@ import { CopyLinkButton } from "@/components/copy-link-button";
 import { SavePostButton } from "@/components/save-post-button";
 import { LikeButton } from "@/components/like-button";
 import { BlogPostView } from "@/components/BlogPostView";
+import { UserAvatar } from "@/components/user-avatar";
 import { richTextSummary, richTextWordCount, sanitizeRichContent } from "@/lib/rich-content";
 import { parsePlateContent } from "@/components/plate/types";
 
@@ -45,7 +46,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <div className="tag-row">{post.tags.map(tag => <Link key={tag} href={`/explore?tag=${encodeURIComponent(tag)}`}>{tag}</Link>)}</div>
           <h1>{post.title}</h1>
           <p className="article-deck">{summary(post.content, 230)}</p>
-          <div className="post-meta">
+          <div className="post-meta author-meta">
+            <UserAvatar userId={post.author} avatarUrl={post.author_avatar} username={post.author_username} size={30} />
             <span>By {post.author_username || "TFacts writer"}</span>
             <span>{new Date(post.created_at).toLocaleDateString("en", { month: "long", day: "numeric", year: "numeric" })}</span>
             <span><Clock3 size={14} /> {readTime(post.content)} min read</span>
