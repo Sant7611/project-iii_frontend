@@ -7,15 +7,15 @@ Quillora is the redesigned frontend for the `project-iii` Django blog backend. I
 - Approved public story feed and article detail pages
 - TF-IDF relevance search through `GET /api/search/?q=`
 - Collaborative-filtering recommendations through `GET /api/recommendation/`
+- Like state/count and toggle through `GET/POST /api/posts/{id}/like/`
 - JWT login, registration, token refresh, and role-aware navigation
 - Rich post creation/editing and inline image upload
 - Threaded comments and replies
 - Saved posts
 - Profile editing and author post status tracking
 - Moderator approval/rejection workflow
-- Super-admin/moderator user management
-- Notifications
-- Like UI prepared for the backend's intended `/posts/{id}/like/` and `/unlike/` routes
+- Role-safe account management and moderator creation
+- REST + WebSocket notifications
 
 ## Setup
 
@@ -23,7 +23,7 @@ Requirements: Node.js 22.13+ and the `project-iii` Django backend.
 
 ```bash
 copy .env.example .env.local
-npm install
+npm ci
 npm run dev
 ```
 
@@ -32,14 +32,17 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-## Important backend note
+## Backend compatibility notes
 
-The current backend `main` branch contains the `Like` model and uses likes for collaborative recommendations, but its like/unlike routes are not active. The Quillora like control reports that clearly instead of pretending a local-only like was persisted. Enable the intended backend routes to make likes fully functional.
+- The current management serializer does not expose an account `role` or post count. Quillora therefore treats the management list as a backend-filtered set of accounts and only displays a role when the API actually returns one.
+- The current profile endpoint reliably supports JSON profile/account fields. Quillora displays existing avatars but does not expose an avatar upload control because there is no dedicated multipart avatar-update contract.
+- Likes use one authenticated toggle endpoint: `GET` reads state/count and `POST` toggles liked/unliked.
 
 ## Validation
 
 ```bash
-npm run build
+npm run lint
 npx tsc --noEmit
+npm run build
 npm test
 ```

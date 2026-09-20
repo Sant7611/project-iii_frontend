@@ -106,7 +106,7 @@ export function ManagedUserDetail({ id }: { id: string }) {
           <span className="kicker">Read-only account view</span>
           <h1>{displayName}</h1>
           <p>
-            @{user.username} · {user.email} · {user.role.replace("_", " ")}
+            @{user.username} · {user.email} · {user.role ? user.role.replace("_", " ") : "managed account"}
           </p>
           <p className="profile-bio">
             {user.profile?.bio || "No bio provided."}
@@ -241,8 +241,7 @@ function isManagedUser(value: unknown): value is ManagedUser {
     typeof value.username === "string" &&
     typeof value.first_name === "string" &&
     typeof value.last_name === "string" &&
-    typeof value.email === "string" &&
-    typeof value.role === "string"
+    typeof value.email === "string"
   );
 }
 
