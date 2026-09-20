@@ -100,3 +100,6 @@ body { background: var(--q-bg); color: var(--q-ink); }
   .article-mobile-actions > * { flex:1; }
   .section-note { display:none; }
 }
+
+.comment-actions .danger-action { color: #a24545; }
+.comment-actions button { display: inline-flex; align-items: center; gap: 4px; }
