@@ -1,10 +1,25 @@
-# tfacts frontend
+# Quillora frontend
 
-`tfacts` is a light, responsive technology-facts publication built with Next.js-compatible Vinext and React. It consumes the Django REST API in the sibling `blog_project` workspace.
+Quillora is the redesigned frontend for the `project-iii` Django blog backend. It is a responsive community publishing experience built with React and Vinext/Next-compatible routing.
+
+## Core product features
+
+- Approved public story feed and article detail pages
+- TF-IDF relevance search through `GET /api/search/?q=`
+- Collaborative-filtering recommendations through `GET /api/recommendation/`
+- JWT login, registration, token refresh, and role-aware navigation
+- Rich post creation/editing and inline image upload
+- Threaded comments and replies
+- Saved posts
+- Profile editing and author post status tracking
+- Moderator approval/rejection workflow
+- Super-admin/moderator user management
+- Notifications
+- Like UI prepared for the backend's intended `/posts/{id}/like/` and `/unlike/` routes
 
 ## Setup
 
-Requirements: Node.js 22.13 or newer and the Django backend running locally.
+Requirements: Node.js 22.13+ and the `project-iii` Django backend.
 
 ```bash
 copy .env.example .env.local
@@ -12,31 +27,14 @@ npm install
 npm run dev
 ```
 
-The frontend defaults to `http://localhost:3000`; the Django API defaults to `http://127.0.0.1:8000/api`.
-
-## Environment
-
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Set `NEXT_PUBLIC_SITE_URL` to the production origin so canonical URLs and the sitemap use the final domain. The Django backend must allow that origin through CORS.
+## Important backend note
 
-## Main routes
-
-- `/` — editorial home and featured posts
-- `/explore` — tag-filtered post discovery
-- `/articles/{id}/{slug}` — crawlable article pages
-- `/search` — post search
-- `/write` — authenticated post submission
-- `/profile` — editable profile and filtered personal posts
-- `/moderation` — moderator/admin approval queue
-- `/users` and `/users/{id}` — role-safe account management
-- `/login` and `/register` — API authentication
-- `/robots.txt` and `/sitemap.xml` — SEO crawl controls
-
-See [BACKEND_API_CONTRACT.md](./BACKEND_API_CONTRACT.md) for existing endpoints, required additions, permission rules, and response shapes.
+The current backend `main` branch contains the `Like` model and uses likes for collaborative recommendations, but its like/unlike routes are not active. The Quillora like control reports that clearly instead of pretending a local-only like was persisted. Enable the intended backend routes to make likes fully functional.
 
 ## Validation
 
