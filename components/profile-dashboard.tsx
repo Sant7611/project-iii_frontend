@@ -260,7 +260,7 @@ export function ProfileDashboard() {
             <h2>Posts</h2>
           </div>
           <Link className="button button-primary" href="/write">
-            Write a fact
+            Write a story
           </Link>
         </div>
         <div className="filter-row" role="group" aria-label="Filter your posts">
@@ -285,7 +285,7 @@ export function ProfileDashboard() {
                 </span>
                 <PostCard
                   post={post}
-                  href={post.approval_status === "rejected" ? `/profile/posts/${post.id}` : undefined}
+                  href={post.approval_status !== "approved" ? `/profile/posts/${post.id}` : undefined}
                   actions={
                     <>
                       <Link

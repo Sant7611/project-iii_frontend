@@ -5,7 +5,7 @@ import { Check, ChevronDown, ChevronUp, ShieldAlert, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { API_URL } from "@/lib/api";
-import { authenticatedFetch, hasAuthSession } from "@/lib/auth";
+import { authenticatedFetch, getStoredUser, hasAuthSession } from "@/lib/auth";
 import type { OwnerPost, Paginated } from "@/lib/types";
 import { PostCard } from "./post-card";
 import { sanitizeRichContentClient } from "@/lib/rich-content-client";
@@ -37,14 +37,21 @@ export function ModerationDashboard() {
         return;
       }
 
+      const actor = getStoredUser();
+      if (!actor || !["moderator", "super_admin"].includes(actor.role)) {
+        if (!cancelled) {
+          setAllowed(false);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) setAllowed(true);
+
       try {
         const items = await fetchModerationPosts();
         if (cancelled) return;
         setPosts(items);
-        setAllowed(
-          items.length === 0 ||
-            items.some((post) => typeof post.approval_status === "string"),
-        );
       } catch {
         if (!cancelled) setAllowed(false);
       } finally {
