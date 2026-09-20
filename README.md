@@ -9,10 +9,10 @@ TFacts is the redesigned frontend for the `project-iii` Django blog backend. It 
 - Collaborative-filtering recommendations through `GET /api/recommendation/`
 - Like state/count and toggle through `GET/POST /api/posts/{id}/like/`
 - JWT login, registration, token refresh, and role-aware navigation
-- Rich post creation/editing and inline image upload
+- Rich post creation/editing, cover-image replace/remove, and inline image upload
 - Threaded comments and replies
 - Saved posts
-- Profile editing and author post status tracking
+- Profile editing with avatar upload/remove and author post status tracking
 - Moderator approval/rejection workflow
 - Role-safe account management and moderator creation
 - REST + WebSocket notifications
@@ -35,7 +35,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ## Backend compatibility notes
 
 - The current management serializer does not expose an account `role` or post count. TFacts therefore treats the management list as a backend-filtered set of accounts and only displays a role when the API actually returns one.
-- The current profile endpoint reliably supports JSON profile/account fields. TFacts displays existing avatars but does not expose an avatar upload control because there is no dedicated multipart avatar-update contract.
+- Profile fields use `/api/profile/me/`; avatar upload/remove uses the dedicated multipart `/api/profile/avatar/` endpoint.
 - Likes use one authenticated toggle endpoint: `GET` reads state/count and `POST` toggles liked/unliked.
 
 ## Validation
