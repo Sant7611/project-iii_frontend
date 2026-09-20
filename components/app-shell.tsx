@@ -62,9 +62,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="quillora-shell">
       <header className="quillora-topbar">
         <button className="mobile-menu" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
-        <Link href="/" className="quillora-brand" aria-label="Quillora home">
-          <span className="quillora-mark">Q</span>
-          <span><strong>Quillora</strong><small>Ideas worth reading</small></span>
+        <Link href="/" className="quillora-brand" aria-label="TFacts home">
+          <span className="quillora-mark">T</span>
+          <span><strong>TFacts</strong><small>Ideas worth reading</small></span>
         </Link>
 
         <form className="quillora-search" onSubmit={submitSearch}>
@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <aside className={`quillora-sidebar ${open ? "is-open" : ""}`}>
         <div className="sidebar-mobile-head">
-          <Link href="/" className="quillora-brand"><span className="quillora-mark">Q</span><strong>Quillora</strong></Link>
+          <Link href="/" className="quillora-brand"><span className="quillora-mark">T</span><strong>TFacts</strong></Link>
           <button onClick={() => setOpen(false)} aria-label="Close navigation"><X size={20} /></button>
         </div>
 
@@ -112,9 +112,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main id="main-content" className="quillora-main">{children}</main>
 
       <footer className="quillora-footer">
-        <div><span className="quillora-mark">Q</span><div><strong>Quillora</strong><p>Thoughtful stories, clearer discovery.</p></div></div>
+        <div><span className="quillora-mark">T</span><div><strong>TFacts</strong><p>Thoughtful stories, clearer discovery.</p></div></div>
         <div><Link href="/explore">Explore</Link><Link href="/write">Write</Link><Link href="/saved">Saved</Link></div>
-        <small>© {new Date().getFullYear()} Quillora</small>
+        <small>© {new Date().getFullYear()} TFacts</small>
       </footer>
     </div>
   );
