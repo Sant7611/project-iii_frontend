@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <div className="auth-wrap">
       <section className="auth-art">
-        <span className="quillora-brand"><span className="quillora-mark">Q</span><strong>TFacts</strong></span>
+        <span className="quillora-brand"><span className="quillora-mark">T</span><strong>TFacts</strong></span>
         <h1>Come back to ideas worth reading.</h1>
         <p>Save stories, shape your recommendations, join discussions, and publish your own writing.</p>
       </section>
