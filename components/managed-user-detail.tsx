@@ -9,6 +9,7 @@ import { authenticatedFetch } from "@/lib/auth";
 import type { OwnerPost, Paginated } from "@/lib/types";
 import { PostCard } from "./post-card";
 import { PostReviewDetails } from "./post-review-details";
+import { UserAvatar } from "./user-avatar";
 import type { ManagedUser } from "./user-management";
 
 type UserDetailData = {
@@ -97,10 +98,8 @@ export function ManagedUserDetail({ id }: { id: string }) {
     <>
       <BackToUsers />
       <section className="profile-hero management-profile">
-        <div className="profile-avatar">
-          {user.profile?.avatar ? (
-            <img src={user.profile.avatar} alt={`${user.username}'s avatar`} />
-          ) : null}
+        <div className="profile-avatar management-avatar">
+          <UserAvatar avatarUrl={user.profile?.avatar ?? null} username={user.username} size={102} />
         </div>
         <div>
           <span className="kicker">Read-only account view</span>

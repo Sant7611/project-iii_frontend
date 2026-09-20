@@ -15,7 +15,7 @@ Login returns access/refresh JWTs plus `user_id`, `username`, `email`, and `role
 - `GET /profile/me/`
 - `PATCH /profile/me/`
 
-The frontend sends JSON account fields plus nested `profile.bio` and `profile.address`. Existing avatar URLs are displayed. The current backend does not expose a dedicated multipart avatar-update route.
+The frontend sends JSON account fields plus nested `profile.bio` and `profile.address`. Profile images use `PATCH /profile/avatar/` with multipart field `avatar`; `DELETE /profile/avatar/` removes the current image. JPEG, PNG, and WebP images up to 5 MB are accepted.
 
 ## Posts
 
@@ -28,7 +28,7 @@ The frontend sends JSON account fields plus nested `profile.bio` and `profile.ad
 - `POST /posts/{id}/accept/`
 - `POST /posts/{id}/reject/`
 
-Post create/update uses multipart form data with `title`, `content`, repeated `tags`, and optional `featured_img`.
+Post create/update uses multipart form data with `title`, `content`, repeated `tags`, and optional `featured_img`. On edit, `clear_featured_img=true` removes the current cover image.
 
 ## Likes
 

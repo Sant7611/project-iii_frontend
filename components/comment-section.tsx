@@ -12,6 +12,7 @@ import {
   hasAuthSession,
 } from "@/lib/auth";
 import type { Comment } from "@/lib/types";
+import { UserAvatar } from "./user-avatar";
 
 export function CommentSection({
   postId,
@@ -266,7 +267,7 @@ export function CommentSection({
 
           return (
             <article className="comment" key={comment.id}>
-              <div className="comment-author" aria-hidden="true">{authorName.charAt(0).toUpperCase()}</div>
+              <UserAvatar avatarUrl={comment.author_avatar} username={authorName} size={38} className="comment-author-avatar" />
               <div>
                 <strong>{authorName}</strong>
 
@@ -358,7 +359,7 @@ export function CommentSection({
                       const ownReply = Boolean(currentUsername && replyAuthor === currentUsername);
                       return (
                         <article className="comment comment-reply" key={reply.id}>
-                          <div className="comment-author" aria-hidden="true">{replyAuthor.charAt(0).toUpperCase()}</div>
+                          <UserAvatar avatarUrl={reply.author_avatar} username={replyAuthor} size={32} className="comment-author-avatar" />
                           <div>
                             <strong>{replyAuthor}</strong>
                             {editingId === reply.id ? (
