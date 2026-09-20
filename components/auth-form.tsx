@@ -49,6 +49,6 @@ export function AuthForm({ mode, redirectTo = "/" }: { mode: "login" | "register
     {mode === "register" && <div className="field"><label htmlFor="password2">Confirm password</label><input id="password2" name="password2" type="password" required minLength={8} autoComplete="new-password" /></div>}
     {error && <div className="form-error" role="alert">{error}</div>}
     <button className="button button-primary" disabled={busy}>{busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}</button>
-    <p className="auth-switch">{mode === "login" ? <>New to Quillora? <Link href="/register">Create an account</Link></> : <>Already have an account? <Link href="/login">Sign in</Link></>}</p>
+    <p className="auth-switch">{mode === "login" ? <>New to TFacts? <Link href="/register">Create an account</Link></> : <>Already have an account? <Link href="/login">Sign in</Link></>}</p>
   </form>;
 }
