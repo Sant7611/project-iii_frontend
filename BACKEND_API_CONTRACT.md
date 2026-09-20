@@ -1,6 +1,6 @@
 # TFacts ↔ project-iii API contract
 
-Base URL: `NEXT_PUBLIC_API_URL` (normally `http://127.0.0.1:9009/api`).
+Base URL: `NEXT_PUBLIC_API_URL` (normally `http://127.0.0.1:8000/api`).
 
 ## Authentication
 

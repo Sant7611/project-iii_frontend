@@ -1,6 +1,6 @@
 import type { Comment, Paginated, Post } from "./types";
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:9009/api").replace(/\/$/, "");
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api").replace(/\/$/, "");
 
 type SuccessEnvelope<T> = { success?: boolean; message?: string; data?: T };
 
