@@ -6,6 +6,7 @@ import { Search, Trash2, UserPlus, Users, X } from "lucide-react";
 
 import { API_URL } from "@/lib/api";
 import { authenticatedFetch, getStoredUser, hasAuthSession } from "@/lib/auth";
+import { UserAvatar } from "./user-avatar";
 
 export type ManagedUser = {
   id: number;
@@ -181,7 +182,7 @@ export function UserManagement() {
                 <tr key={user.id}>
                   <td>
                     <Link href={`/users/${user.id}`} className="table-user">
-                      <span className="user-avatar">{user.profile?.avatar ? <img src={user.profile.avatar} alt="" /> : null}</span>
+                      <UserAvatar avatarUrl={user.profile?.avatar ?? null} username={user.username} size={38} />
                       <span>
                         <strong>{[user.first_name, user.last_name].filter(Boolean).join(" ") || user.username}</strong>
                         <small>{user.email}</small>
