@@ -37,7 +37,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setOpen(false), 0);
+    return () => window.clearTimeout(timer);
+  }, [pathname]);
 
   useEffect(() => {
     if (!protectedRoutes.some((route) => pathname === route || pathname.startsWith(route + "/"))) return;

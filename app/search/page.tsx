@@ -3,12 +3,13 @@ import Link from "next/link";
 import { SearchX, Sparkles } from "lucide-react";
 import { PostCard } from "@/components/post-card";
 import { searchPosts } from "@/lib/api";
+import type { Post } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Search | Quillora", robots: { index: false, follow: true } };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const query = ((await searchParams).q || "").trim();
-  let results = [];
+  let results: Post[] = [];
   let unavailable = false;
 
   if (query.length >= 3) {
@@ -28,7 +29,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       {unavailable && <div className="notice">The search API could not be reached.</div>}
 
       {results.length > 0 ? (
-        <div className="post-grid">{results.map((post: any) => <PostCard key={post.id} post={post} />)}</div>
+        <div className="post-grid">{results.map(post => <PostCard key={post.id} post={post} />)}</div>
       ) : query.length >= 3 && !unavailable ? (
         <div className="empty-state"><SearchX size={34} /><h2>No matching stories</h2><p>Try a different phrase or browse the full feed.</p><Link className="button button-primary" href="/explore">Explore stories</Link></div>
       ) : null}

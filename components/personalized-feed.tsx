@@ -7,27 +7,36 @@ import { authenticatedFetch, hasAuthSession } from "@/lib/auth";
 import type { Post } from "@/lib/types";
 import { PostCard } from "./post-card";
 
+type RecommendationItem = Partial<Post> & { author?: string; excerpt?: string };
+
 export function PersonalizedFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    const active = hasAuthSession();
-    setSignedIn(active);
-    if (!active) return;
+    if (!hasAuthSession()) return;
+    let cancelled = false;
 
     authenticatedFetch(`${API_URL}/recommendation/`, { headers: { Accept: "application/json" } })
       .then(async response => {
-        if (!response.ok) return [];
-        const payload = await response.json();
-        const data = payload?.data ?? payload;
-        return Array.isArray(data?.["recommendation results"]) ? data["recommendation results"] : [];
+        if (!response.ok) return [] as RecommendationItem[];
+        const payload: unknown = await response.json();
+        if (!payload || typeof payload !== "object") return [] as RecommendationItem[];
+        const wrapped = payload as { data?: unknown };
+        const data = wrapped.data && typeof wrapped.data === "object" ? wrapped.data : payload;
+        if (!data || typeof data !== "object") return [] as RecommendationItem[];
+        const record = data as Record<string, unknown>;
+        const items = record["recommendation results"];
+        return Array.isArray(items) ? items as RecommendationItem[] : [];
       })
-      .then(items => setPosts(items.map((item: any) => normalizePost(item))))
+      .then(items => {
+        if (!cancelled) setPosts(items.map(item => normalizePost(item)));
+      })
       .catch(() => undefined);
+
+    return () => { cancelled = true; };
   }, []);
 
-  if (!signedIn || posts.length === 0) return null;
+  if (posts.length === 0) return null;
 
   return (
     <section className="section recommendation-section">
