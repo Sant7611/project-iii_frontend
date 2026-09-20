@@ -1,9 +1,10 @@
-name: Validate Quillora
+name: Validate TFacts
 
 on:
   push:
     branches:
       - quillora-redesign
+      - tfacts-frontend-sync
   pull_request:
     branches:
       - main
