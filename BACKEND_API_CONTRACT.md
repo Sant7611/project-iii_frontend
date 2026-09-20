@@ -1,67 +1,89 @@
-# tfacts frontend API contract
+# TFacts ↔ project-iii API contract
 
-The frontend uses `NEXT_PUBLIC_API_URL` as its base, normally `http://127.0.0.1:8000/api`.
+Base URL: `NEXT_PUBLIC_API_URL` (normally `http://127.0.0.1:9009/api`).
 
-## Existing routes conssumed
+## Authentication
 
-- `GET /posts/` — approved public posts; moderator/admin responses also include `approval_status`, `rejection_reason`, and review data.
-- `GET /posts/{id}/` — public post detail.
-- `POST /posts/` — authenticated multipart post creation with `title`, `content`, repeated `tags`, and optional `featured_img`.
-- `GET /posts/my-posts/` — signed-in author’s paginated posts with moderation status.
-- `POST /posts/{id}/accept/` — moderator/admin approval.
-- `POST /posts/{id}/reject/` — moderator/admin rejection; JSON body `{ "reason": "..." }`.
-- `GET /posts/{id}/comments/` — post comments.
-- `POST /auth/login/` — email/password login.
-- `POST /auth/register/` — account registration.
-- `GET/PATCH /profile/{user_id}/` — profile view/update.
+- `POST /auth/register/`
+- `POST /auth/login/`
+- `POST /token/refresh/`
 
-## Required additions
+Login returns access/refresh JWTs plus `user_id`, `username`, `email`, and `role`.
 
-### Authentication role
+## Profile
 
-Add `role` to `POST /auth/login/` response data so the frontend can hide privileged navigation. Allowed values: `user`, `moderator`, `super_admin`.
+- `GET /profile/me/`
+- `PATCH /profile/me/`
 
-### Profile avatar update
+The frontend sends JSON account fields plus nested `profile.bio` and `profile.address`. Existing avatar URLs are displayed. The current backend does not expose a dedicated multipart avatar-update route.
 
-- Keep `PATCH /profile/{user_id}/` for the existing JSON text-field update with nested `profile.bio` and `profile.address`. Only the account owner may update it.
-- Add `PATCH /profile/{user_id}/avatar/` as `multipart/form-data` with one `avatar` file. Only the account owner may update it.
-- Both successful responses should return the full nested user/profile shape, either directly or under `data`.
+## Posts
 
-### Role-safe account management
+- `GET /posts/`
+- `GET /posts/{id}/`
+- `POST /posts/`
+- `PATCH /posts/{id}/`
+- `DELETE /posts/{id}/`
+- `GET /posts/my-posts/`
+- `POST /posts/{id}/accept/`
+- `POST /posts/{id}/reject/`
 
-- `GET /management/users/` — paginated list. Moderator sees regular users only. Super admin sees regular users and moderators. Never return a super-admin account in this list.
-- `GET /management/users/{id}/` — read-only user detail plus all their posts. Apply the same hierarchy as the list route.
-- `DELETE /management/users/{id}/` — soft-delete the permitted target. Moderator can remove regular users. Super admin can remove regular users or moderators. Neither role can remove a super admin. Return `204 No Content`.
+Post create/update uses multipart form data with `title`, `content`, repeated `tags`, and optional `featured_img`.
 
-List item fields:
+## Likes
 
-```json
-{
-  "id": 12,
-  "username": "reader",
-  "first_name": "Tara",
-  "last_name": "Shah",
-  "email": "tara@example.com",
-  "phone": "",
-  "role": "user",
-  "is_active": true,
-  "post_count": 4,
-  "profile": { "avatar": null, "bio": "", "address": "" }
-}
-```
+- `GET /posts/{id}/like/` — returns the signed-in user's `liked` state and total `count`
+- `POST /posts/{id}/like/` — toggles like/unlike and returns the new state/count
 
-Detail response:
+The collaborative recommender uses persisted `Like` rows.
 
-```json
-{
-  "user": { "id": 12, "username": "reader", "role": "user", "profile": { "avatar": null, "bio": "", "address": "" } },
-  "posts": []
-}
-```
+## Comments
 
-## Backend corrections discovered
+Nested under posts:
 
-- Protect `ProfileView` so users cannot list, edit, or delete other profiles.
-- Import/fix the missing names used by post approval/rejection (`PostStatus` and `Notification`) or reference `Post.PostStatus` consistently.
-- Return category data if categories should appear independently from tags.
-- Ensure media URLs are absolute in API responses and allow the deployed frontend origin in CORS.
+- `GET /posts/{post_id}/comments/`
+- `POST /posts/{post_id}/comments/`
+- `GET /posts/{post_id}/comments/{id}/`
+- `PATCH /posts/{post_id}/comments/{id}/`
+- `DELETE /posts/{post_id}/comments/{id}/`
+
+Replies are created by posting `{ "content": "...", "parent": <comment_id> }`.
+
+## Saved posts
+
+- `GET /saved/`
+- `POST /saved/` with `{ "post": <post_id> }`
+- `DELETE /saved/{saved_id}/`
+
+## Search and recommendation algorithms
+
+- `GET /search/?q=...` — TF-IDF ranked approved posts
+- `GET /recommendation/` — authenticated collaborative-filtering recommendations based on likes
+
+## Rich editor uploads
+
+- `POST /upload/` multipart field `image`
+- JPEG, PNG, WebP, GIF
+- maximum 5 MB
+- returns `data.url`
+
+## Notifications
+
+REST:
+
+- `GET /notification/`
+- `PATCH /notification/{id}/`
+- `DELETE /notification/{id}/`
+
+WebSocket:
+
+- `/ws/notifications/?token=<access JWT>`
+
+## Account management
+
+- `GET /management/users/`
+- `GET /management/users/{id}/`
+- `DELETE /management/users/{id}/`
+- `POST /management/users/create_moderator/` (super-admin only)
+
+The backend applies role hierarchy in its queryset/permissions. The current `UserManagementSerializer` returns `id`, profile, first/last name, email, username, and phone; it does not currently return role or post count for list/detail responses.

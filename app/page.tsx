@@ -1,91 +1,66 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Compass, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Search, Sparkles } from "lucide-react";
 import { PostCard } from "@/components/post-card";
+import { PersonalizedFeed } from "@/components/personalized-feed";
 import { getPosts } from "@/lib/api";
 
 export const metadata: Metadata = {
-  title: "Technology facts and practical explainers",
-  description: "Discover clear, practical stories about software, AI, the web, and the ideas shaping technology.",
-  alternates: { canonical: "/" },
+  title: "TFacts — Ideas worth reading",
+  description: "Discover thoughtful blog posts with relevance search, personalized recommendations, likes, comments, saves, and community publishing.",
 };
 
 export default async function HomePage() {
   const { posts, available } = await getPosts();
-  const [featured, ...latest] = posts;
-  const tags = [...new Set(posts.flatMap((post) => post.tags))].slice(0, 8);
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "tfacts",
-    description: "Technology facts and explainers, made clear.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  };
+  const [featured, ...rest] = posts;
+  const tags = [...new Set(posts.flatMap(post => post.tags || []))].slice(0, 10);
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="hero" aria-labelledby="home-title">
-        <div className="eyebrow"><Sparkles size={15} /> Curious by default</div>
-        <h1 id="home-title">Technology is better<br />when it <em>makes sense.</em></h1>
-        <p>Short facts, useful context, and thoughtful explainers for people who want to understand what’s next—not just scroll past it.</p>
-        <div className="hero-actions">
-          <Link className="button button-primary" href="#latest">Start exploring <ArrowRight size={17} /></Link>
-          <Link className="button button-secondary" href="/write">Share a fact</Link>
+      <section className="quillora-hero">
+        <div className="hero-copy">
+          <span className="eyebrow"><Sparkles size={14} /> A smarter way to discover writing</span>
+          <h1>Stories that stay with you.</h1>
+          <p>Read thoughtful posts, find ideas with relevance-ranked search, and discover recommendations shaped by what you genuinely like.</p>
+          <div className="hero-actions">
+            <Link href="/explore" className="button button-primary">Explore stories <ArrowRight size={17} /></Link>
+            <Link href="/write" className="button button-secondary">Start writing</Link>
+          </div>
+          <div className="hero-proof">
+            <span><Search size={16} /> TF-IDF relevance search</span>
+            <span><Sparkles size={16} /> Collaborative recommendations</span>
+            <span><BookOpen size={16} /> Community publishing</span>
+          </div>
         </div>
-        <div className="hero-orbit orbit-one" aria-hidden="true">01</div>
-        <div className="hero-orbit orbit-two" aria-hidden="true">AI</div>
-        <div className="hero-orbit orbit-three" aria-hidden="true">101</div>
+        <div className="hero-visual" aria-hidden="true">
+          <div className="paper-card paper-one"><span>01</span><strong>Find what matters.</strong></div>
+          <div className="paper-card paper-two"><span>02</span><strong>Read deeply.</strong></div>
+          <div className="paper-card paper-three"><span>03</span><strong>Join the conversation.</strong></div>
+        </div>
       </section>
 
-      {!available && (
-        <div className="notice" role="status">
-          <span>API preview</span> Start the Django backend to replace this sample editorial content with live approved posts.
-        </div>
+      {!available && <div className="notice">The Django API is currently unreachable. TFacts will populate automatically when the backend is running.</div>}
+
+      {featured && (
+        <section className="section">
+          <div className="section-heading"><div><span className="kicker">Featured</span><h2>A story worth opening</h2></div><Link href="/explore">See all <ArrowRight size={15} /></Link></div>
+          <PostCard post={featured} featured />
+        </section>
       )}
 
-      <section className="section" aria-labelledby="featured-title">
-        <div className="section-heading">
-          <div><span className="kicker">Editor’s pick</span><h2 id="featured-title">One idea worth your time</h2></div>
-          <span className="section-index">01 / Featured</span>
-        </div>
-        {featured && <PostCard post={featured} featured />}
+      <PersonalizedFeed />
+
+      <section className="section">
+        <div className="section-heading"><div><span className="kicker">Latest</span><h2>Fresh from the community</h2></div><Link href="/explore">Explore all <ArrowRight size={15} /></Link></div>
+        <div className="post-grid">{rest.slice(0, 6).map(post => <PostCard key={post.id} post={post} />)}</div>
       </section>
 
-      <section className="section" id="latest" aria-labelledby="latest-title">
-        <div className="section-heading">
-          <div><span className="kicker">Freshly decoded</span><h2 id="latest-title">Latest facts</h2></div>
-          <Link className="text-link" href="/explore">Explore all <ArrowRight size={16} /></Link>
-        </div>
-        <div className="post-grid">
-          {latest.slice(0, 6).map((post) => <PostCard key={post.id} post={post} />)}
-        </div>
-      </section>
-
-      <section className="topic-panel" aria-labelledby="topics-title">
-        <div>
-          <span className="kicker">Find your rabbit hole</span>
-          <h2 id="topics-title">Browse by topic</h2>
-          <p>Follow the threads that make you curious.</p>
-        </div>
-        <div className="topic-cloud">
-          {(tags.length ? tags : ["Artificial intelligence", "Web", "Security", "Software", "Data", "Future tech"]).map((tag, index) => (
-            <Link href={`/explore?tag=${encodeURIComponent(tag)}`} key={tag} className={`topic-pill color-${index % 4}`}>
-              <Compass size={16} /> {tag}
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="newsletter" aria-labelledby="newsletter-title">
-        <div><span className="kicker">A smarter inbox</span><h2 id="newsletter-title">One useful tech idea.<br />Every week.</h2></div>
-        <div><p>No hot takes. No noise. Just one clear idea worth knowing.</p><a className="button button-dark" href="mailto:hello@tfacts.dev?subject=Subscribe%20to%20tfacts">Join the curious <ArrowRight size={17} /></a></div>
-      </section>
+      {tags.length > 0 && (
+        <section className="topic-panel">
+          <div><span className="kicker">Browse interests</span><h2>Follow your curiosity.</h2><p>Jump into the topics writers are publishing about right now.</p></div>
+          <div className="topic-cloud">{tags.map(tag => <Link href={`/explore?tag=${encodeURIComponent(tag)}`} key={tag}>{tag}</Link>)}</div>
+        </section>
+      )}
     </>
   );
 }

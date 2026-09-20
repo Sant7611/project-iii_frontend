@@ -5,10 +5,12 @@ import { Check, ChevronDown, ChevronUp, ShieldAlert, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { API_URL } from "@/lib/api";
-import { authenticatedFetch, hasAuthSession } from "@/lib/auth";
+import { authenticatedFetch, getStoredUser, hasAuthSession } from "@/lib/auth";
 import type { OwnerPost, Paginated } from "@/lib/types";
 import { PostCard } from "./post-card";
 import { sanitizeRichContentClient } from "@/lib/rich-content-client";
+import { BlogPostView } from "./BlogPostView";
+import { parsePlateContent } from "./plate/types";
 
 type Filter = "pending" | "approved" | "rejected" | "all";
 type ModerationAction = "accept" | "reject";
@@ -35,14 +37,21 @@ export function ModerationDashboard() {
         return;
       }
 
+      const actor = getStoredUser();
+      if (!actor || !["moderator", "super_admin"].includes(actor.role)) {
+        if (!cancelled) {
+          setAllowed(false);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) setAllowed(true);
+
       try {
         const items = await fetchModerationPosts();
         if (cancelled) return;
         setPosts(items);
-        setAllowed(
-          items.length === 0 ||
-            items.some((post) => typeof post.approval_status === "string"),
-        );
       } catch {
         if (!cancelled) setAllowed(false);
       } finally {
@@ -170,7 +179,7 @@ export function ModerationDashboard() {
         <span className="kicker">Keep the signal clear</span>
         <h1>Post moderation</h1>
         <p>
-          Review submissions, approve useful facts, and return anything that
+          Review submissions, approve strong posts, and return anything that
           needs stronger context.
         </p>
       </header>
@@ -246,14 +255,14 @@ export function ModerationDashboard() {
                   <header>
                     <span className="kicker">Full submission preview</span>
                     <h2>{post.title}</h2>
-                    <p>By {post.author_username || "tfacts"}</p>
+                    <p>By {post.author_username || "TFacts writer"}</p>
                   </header>
                   {post.featured_img && (
                     <img className="moderation-preview-image" src={post.featured_img} alt="" />
                   )}
-                  <div
-                    className="article-body editor-output-wrapper editor-rich-content"
-                    dangerouslySetInnerHTML={{ __html: sanitizeRichContentClient(post.content) }}
+                  <BlogPostView
+                    html={parsePlateContent(post.content) ? post.content : sanitizeRichContentClient(post.content)}
+                    className="article-body editor-rich-content"
                   />
                   <div className="tag-row moderation-preview-tags">
                     {post.tags.map((tag) => <span key={tag}>{tag}</span>)}

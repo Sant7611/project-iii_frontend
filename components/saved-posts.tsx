@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { API_URL } from "@/lib/api";
 import { authenticatedFetch } from "@/lib/auth";
+import { forgetSavedPost, rememberSavedPost } from "@/lib/saved-state";
 import type { Paginated, Post } from "@/lib/types";
 import { PostCard } from "./post-card";
 
@@ -27,7 +28,11 @@ export function SavedPosts() {
         if (!response.ok) throw new Error("Your saved posts could not be loaded.");
         const records = readSavedRecords(await response.json());
         const resolved = await Promise.all(records.map(resolveSavedPost));
-        if (!cancelled) setItems(resolved.filter((item): item is SavedItem => item !== null));
+        if (!cancelled) {
+          const items = resolved.filter((item): item is SavedItem => item !== null);
+          items.forEach(item => rememberSavedPost(item.post.id, item.id));
+          setItems(items);
+        }
       } catch (reason) {
         if (!cancelled) setError(reason instanceof Error ? reason.message : "Your saved posts could not be loaded.");
       }
@@ -46,6 +51,7 @@ export function SavedPosts() {
         headers: { Accept: "application/json" },
       });
       if (!response.ok) setItems(previous);
+      else forgetSavedPost(item.post.id);
     } catch {
       setItems(previous);
     }
@@ -53,9 +59,9 @@ export function SavedPosts() {
 
   return (
     <>
-      <header className="page-heading"><span className="kicker">Your collection</span><h1>Saved for a thoughtful moment.</h1><p>Facts you bookmark will wait here for you.</p></header>
+      <header className="page-heading"><span className="kicker">Your collection</span><h1>Saved for a thoughtful moment.</h1><p>Stories you bookmark will wait here for you.</p></header>
       {error && <div className="form-error" role="alert">{error}</div>}
-      {items === null ? <div className="empty-state"><p>Loading saved posts…</p></div> : items.length ? <div className="post-grid saved-post-grid">{items.map((item) => <PostCard key={item.id} post={item.post} actions={<button className="button button-secondary danger" onClick={() => void remove(item)}><Trash2 size={15} /> Remove</button>} />)}</div> : <div className="empty-state"><Bookmark size={34} /><h2>Nothing saved yet</h2><p>Use the bookmark on any fact to build your personal reading list.</p><Link className="button button-primary" href="/explore">Find a fact</Link></div>}
+      {items === null ? <div className="empty-state"><p>Loading saved posts…</p></div> : items.length ? <div className="post-grid saved-post-grid">{items.map((item) => <PostCard key={item.id} post={item.post} actions={<button className="button button-secondary danger" onClick={() => void remove(item)}><Trash2 size={15} /> Remove</button>} />)}</div> : <div className="empty-state"><Bookmark size={34} /><h2>Nothing saved yet</h2><p>Use the bookmark on any story to build your personal reading list.</p><Link className="button button-primary" href="/explore">Find a story</Link></div>}
     </>
   );
 }

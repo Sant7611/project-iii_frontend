@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-
 import { WriteForm } from "@/components/write-form";
 
 export const metadata: Metadata = {
-  title: "Write a technology fact",
-  description: "Contribute a clear, useful technology fact to tfacts.",
+  title: "Write a story",
+  description: "Publish a thoughtful story to the TFacts community.",
   robots: { index: false, follow: true },
 };
 
-export default async function WritePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ edit?: string }>;
-}) {
+export default async function WritePage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   const edit = (await searchParams).edit;
   const editId = edit && /^\d+$/.test(edit) ? edit : undefined;
   const isEditing = Boolean(editId);
@@ -20,25 +15,19 @@ export default async function WritePage({
   return (
     <>
       <header className="page-heading">
-        <span className="kicker">{isEditing ? "Prepare for review" : "Add to the signal"}</span>
-        <h1>{isEditing ? "Revise your post." : "Share something worth knowing."}</h1>
-        <p>
-          {isEditing
-            ? "Address the moderator feedback, then submit the revised post for another review."
-            : "Teach one idea clearly. Every submission is reviewed before it appears publicly."}
-        </p>
+        <span className="kicker">{isEditing ? "Prepare for review" : "Publish with purpose"}</span>
+        <h1>{isEditing ? "Revise your story." : "Write something worth reading."}</h1>
+        <p>{isEditing ? "Address moderator feedback, then resubmit your revised post." : "Share one clear idea. Every submission is reviewed before it appears publicly."}</p>
       </header>
       <div className="writer-wrap">
-        <section className="writer-panel">
-          <WriteForm editId={editId} />
-        </section>
+        <section className="writer-panel"><WriteForm editId={editId} /></section>
         <aside className="writer-tips">
-          <h2>A good tfact is…</h2>
+          <h2>A strong TFacts post is…</h2>
           <ol>
-            <li><strong>Specific.</strong> It makes one memorable point.</li>
-            <li><strong>Clear.</strong> A curious reader can understand it without jargon.</li>
+            <li><strong>Focused.</strong> It has one clear reason to exist.</li>
+            <li><strong>Readable.</strong> It respects the reader’s time.</li>
             <li><strong>Grounded.</strong> It separates evidence from opinion.</li>
-            <li><strong>Useful.</strong> It leaves the reader seeing technology differently.</li>
+            <li><strong>Useful.</strong> It leaves the reader with something worth remembering.</li>
           </ol>
         </aside>
       </div>
