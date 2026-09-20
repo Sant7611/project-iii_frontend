@@ -24,8 +24,8 @@ export function SavePostButton({ postId }: { postId: number }) {
 
   useEffect(() => {
     if (!hasAuthSession()) {
-      setChecking(false);
-      return;
+      const timer = window.setTimeout(() => setChecking(false), 0);
+      return () => window.clearTimeout(timer);
     }
 
     let cancelled = false;
