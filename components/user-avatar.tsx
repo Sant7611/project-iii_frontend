@@ -80,7 +80,7 @@ export function UserAvatar({
 
   return (
     <span className={`user-avatar ${className}`} style={{ width: size, height: size }}>
-      {avatar ? <img src={avatar} alt="" /> : <span className="user-avatar-initial">{initial}</span>}
+      {avatar ? <img src={avatar} alt="" /> : <span className="user-avatar-initial" style={{ fontSize: Math.max(10, Math.round(size * 0.42)) }}>{initial}</span>}
     </span>
   );
 }
