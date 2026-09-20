@@ -11,7 +11,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-wrap">
       <section className="auth-art">
-        <span className="quillora-brand"><span className="quillora-mark">Q</span><strong>TFacts</strong></span>
+        <span className="quillora-brand"><span className="quillora-mark">T</span><strong>TFacts</strong></span>
         <h1>Your next good idea starts here.</h1>
         <p>Build your reading space, discover better recommendations, and contribute to the community.</p>
       </section>
