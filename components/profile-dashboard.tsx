@@ -171,6 +171,9 @@ export function ProfileDashboard() {
           ? { ...current, profile: { ...current.profile, avatar } }
           : current,
       );
+      setPosts((current) =>
+        current.map((post) => ({ ...post, author_avatar: avatar })),
+      );
       setMessage("Profile image updated.");
       window.dispatchEvent(new Event(AVATAR_CHANGE_EVENT));
     } catch (reason) {
@@ -204,6 +207,9 @@ export function ProfileDashboard() {
         current
           ? { ...current, profile: { ...current.profile, avatar: null } }
           : current,
+      );
+      setPosts((current) =>
+        current.map((post) => ({ ...post, author_avatar: null })),
       );
       setMessage("Profile image removed.");
       window.dispatchEvent(new Event(AVATAR_CHANGE_EVENT));
