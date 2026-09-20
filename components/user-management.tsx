@@ -122,7 +122,7 @@ export function UserManagement() {
   }
 
   async function remove(user: ManagedUser) {
-    if (!window.confirm(`Remove ${user.username}? Their account will be soft-deleted.`)) return;
+    if (!window.confirm(`Remove ${user.username}? This account removal cannot be undone from the frontend.`)) return;
 
     try {
       const response = await authenticatedFetch(`${API_URL}/management/users/${user.id}/`, {
