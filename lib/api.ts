@@ -16,7 +16,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: { Accept: "application/json", ...init?.headers },
-    next: init?.method ? undefined : { revalidate: 45 },
+    cache: init?.cache ?? (init?.method ? undefined : "no-store"),
   });
   if (!response.ok) throw new Error(`API request failed (${response.status})`);
   return unwrap(await response.json() as T | SuccessEnvelope<T>);
