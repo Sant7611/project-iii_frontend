@@ -21,6 +21,7 @@ export function WriteForm({ editId }: { editId?: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
+  const [removeFeaturedImage, setRemoveFeaturedImage] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -86,6 +87,7 @@ export function WriteForm({ editId }: { editId?: string }) {
     tagList.forEach((tag) => body.append("tags", tag));
     const image = form.get("featured_img");
     if (image instanceof File && image.size) body.set("featured_img", image);
+    if (removeFeaturedImage) body.set("clear_featured_img", "true");
 
     try {
       const response = await authenticatedFetch(
@@ -111,6 +113,7 @@ export function WriteForm({ editId }: { editId?: string }) {
       setContent(EMPTY_PLATE_VALUE);
       setTags("");
       setNewImagePreview(null);
+      setRemoveFeaturedImage(false);
       event.currentTarget.reset();
     } catch (reason) {
       setError(
@@ -147,7 +150,7 @@ export function WriteForm({ editId }: { editId?: string }) {
       </div>
       <div className="field">
         <label htmlFor="featured_img">Cover image (optional)</label>
-        {(newImagePreview || post?.featured_img) && (
+        {!removeFeaturedImage && (newImagePreview || post?.featured_img) && (
           <figure className="cover-image-preview">
             <img
               src={newImagePreview || post?.featured_img || ""}
@@ -156,10 +159,26 @@ export function WriteForm({ editId }: { editId?: string }) {
             <figcaption>{newImagePreview ? "New image preview" : "Current cover image"}</figcaption>
           </figure>
         )}
-        <input id="featured_img" name="featured_img" type="file" accept="image/*" onChange={(event) => {
-          const file = event.currentTarget.files?.[0];
-          setNewImagePreview(file ? URL.createObjectURL(file) : null);
-        }} />
+        <div className="cover-image-controls">
+          <input id="featured_img" name="featured_img" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            if (newImagePreview) URL.revokeObjectURL(newImagePreview);
+            setNewImagePreview(file ? URL.createObjectURL(file) : null);
+            if (file) setRemoveFeaturedImage(false);
+          }} />
+          {isEditing && post?.featured_img && !newImagePreview && (
+            <button
+              className="button button-secondary danger"
+              type="button"
+              onClick={() => setRemoveFeaturedImage((current) => !current)}
+            >
+              {removeFeaturedImage ? "Keep current cover" : "Remove current cover"}
+            </button>
+          )}
+        </div>
+        {removeFeaturedImage && (
+          <p className="field-help">The current cover image will be removed when you save the post.</p>
+        )}
       </div>
       {error && <div className="form-error" role="alert">{error}</div>}
       {message && <div className="form-success" role="status">{message}</div>}
