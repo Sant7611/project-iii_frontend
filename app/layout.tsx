@@ -7,11 +7,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Quillora — Ideas worth reading", template: "%s | Quillora" },
+  title: { default: "TFacts — Ideas worth reading", template: "%s | TFacts" },
   description: "A community blog for thoughtful writing, relevance-ranked discovery, personalized recommendations, likes, comments, saves, and publishing.",
   keywords: ["blog", "community writing", "article discovery", "recommendations", "search"],
-  openGraph: { type: "website", siteName: "Quillora", title: "Quillora — Ideas worth reading", description: "Thoughtful stories, clearer discovery." },
-  twitter: { card: "summary_large_image", title: "Quillora — Ideas worth reading", description: "Thoughtful stories, clearer discovery." },
+  openGraph: { type: "website", siteName: "TFacts", title: "TFacts — Ideas worth reading", description: "Thoughtful stories, clearer discovery." },
+  twitter: { card: "summary_large_image", title: "TFacts — Ideas worth reading", description: "Thoughtful stories, clearer discovery." },
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#fbfaf7" };
