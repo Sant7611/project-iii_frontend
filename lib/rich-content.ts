@@ -1,4 +1,5 @@
 import sanitizeHtml from "sanitize-html";
+import { contentExcerpt, contentWordCount } from "./content-text";
 
 export function sanitizeRichContent(content: string): string {
   return sanitizeHtml(content, {
@@ -27,10 +28,9 @@ export function sanitizeRichContent(content: string): string {
 }
 
 export function richTextSummary(content: string, length = 165): string {
-  const plainText = sanitizeHtml(content, { allowedTags: [] }).replace(/\s+/g, " ").trim();
-  return plainText.length > length ? `${plainText.slice(0, length).trim()}…` : plainText;
+  return contentExcerpt(content, length);
 }
 
 export function richTextWordCount(content: string): number {
-  return sanitizeHtml(content, { allowedTags: [] }).trim().split(/\s+/).filter(Boolean).length;
+  return contentWordCount(content);
 }

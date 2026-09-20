@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { API_URL } from "@/lib/api";
-import { authenticatedFetch, type StoredUser } from "@/lib/auth";
+import { authenticatedFetch, getAccessToken, type StoredUser } from "@/lib/auth";
 
 type Notification = {
   id: number;
@@ -49,7 +49,7 @@ export function NotificationBell({ user }: { user: StoredUser | null }) {
     }
 
     function connect() {
-      const token = localStorage.getItem("tfacts-access");
+      const token = getAccessToken();
       if (!token || stopped) return;
 
       const url = new URL("/ws/notifications/", API_URL);

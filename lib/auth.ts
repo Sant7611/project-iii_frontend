@@ -25,6 +25,11 @@ export function getStoredUser(): StoredUser | null {
   }
 }
 
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("quillora-access");
+}
+
 export function hasAuthSession(): boolean {
   if (typeof window === "undefined") return false;
   return Boolean(localStorage.getItem("quillora-access") && getStoredUser());
