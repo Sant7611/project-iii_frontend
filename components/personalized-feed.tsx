@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { API_URL } from "@/lib/api";
+import { API_URL, normalizePost } from "@/lib/api";
 import { authenticatedFetch, hasAuthSession } from "@/lib/auth";
 import type { Post } from "@/lib/types";
 import { PostCard } from "./post-card";
@@ -17,13 +17,13 @@ export function PersonalizedFeed() {
     if (!active) return;
 
     authenticatedFetch(`${API_URL}/recommendation/`, { headers: { Accept: "application/json" } })
-      .then(async (response) => {
-        if (!response.ok) return null;
+      .then(async response => {
+        if (!response.ok) return [];
         const payload = await response.json();
         const data = payload?.data ?? payload;
-        return data?.["recommendation results"] ?? [];
+        return Array.isArray(data?.["recommendation results"]) ? data["recommendation results"] : [];
       })
-      .then((items) => Array.isArray(items) && setPosts(items))
+      .then(items => setPosts(items.map((item: any) => normalizePost(item))))
       .catch(() => undefined);
   }, []);
 
@@ -33,7 +33,7 @@ export function PersonalizedFeed() {
     <section className="section recommendation-section">
       <div className="section-heading">
         <div><span className="kicker"><Sparkles size={14} /> Collaborative recommendations</span><h2>Picked for you</h2></div>
-        <p>Based on overlap between your likes and readers with similar interests.</p>
+        <p className="section-note">Based on readers who liked some of the same stories you did.</p>
       </div>
       <div className="post-grid">{posts.map(post => <PostCard key={post.id} post={post} />)}</div>
     </section>
