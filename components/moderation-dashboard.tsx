@@ -65,6 +65,16 @@ export function ModerationDashboard() {
     };
   }, [router]);
 
+  const counts = useMemo(
+    () => ({
+      all: posts.length,
+      pending: posts.filter((post) => post.approval_status === "pending").length,
+      approved: posts.filter((post) => post.approval_status === "approved").length,
+      rejected: posts.filter((post) => post.approval_status === "rejected").length,
+    }),
+    [posts],
+  );
+
   const visible = useMemo(
     () =>
       filter === "all"
@@ -110,9 +120,23 @@ export function ModerationDashboard() {
   ) {
     if (actingPostId !== null) return;
 
+    const nextStatus = action === "accept" ? "approved" : "rejected";
+    const optimisticPost: OwnerPost = {
+      ...post,
+      approval_status: nextStatus,
+      rejection_reason: action === "reject" ? reason : "",
+    };
+
     setMessage("");
     setError("");
     setActingPostId(post.id);
+
+    // Move the item out of the Pending queue immediately. If the API call
+    // fails, the original post is restored below.
+    setPosts((items) =>
+      items.map((item) => (item.id === post.id ? optimisticPost : item)),
+    );
+
     try {
       const response = await authenticatedFetch(
         `${API_URL}/posts/${post.id}/${action}/`,
@@ -128,23 +152,25 @@ export function ModerationDashboard() {
       const payload = await readResponse(response);
       if (!response.ok) throw new Error(moderationError(payload));
 
-      const nextStatus = action === "accept" ? "approved" : "rejected";
       const returnedPost = extractPost(payload);
-      setPosts((items) =>
-        items.map((item) =>
-          item.id === post.id
-            ? returnedPost || {
-                ...item,
-                approval_status: nextStatus,
-                rejection_reason: action === "reject" ? reason : "",
-              }
-            : item,
-        ),
-      );
+      if (returnedPost) {
+        setPosts((items) =>
+          items.map((item) => (item.id === post.id ? returnedPost : item)),
+        );
+      }
+
       setRejectingPostId(null);
       setRejectionReason("");
-      setMessage(`“${post.title}” was ${nextStatus}.`);
+      setExpandedPostId((current) => (current === post.id ? null : current));
+      setMessage(
+        action === "accept"
+          ? `“${post.title}” was approved and removed from the pending queue.`
+          : `“${post.title}” was rejected and removed from the pending queue.`,
+      );
     } catch (reasonCaught) {
+      setPosts((items) =>
+        items.map((item) => (item.id === post.id ? post : item)),
+      );
       setError(
         reasonCaught instanceof Error
           ? reasonCaught.message
@@ -192,24 +218,24 @@ export function ModerationDashboard() {
 
       <section className="profile-stats">
         <div>
-          <strong>{posts.length}</strong>
+          <strong>{counts.all}</strong>
           <span>Total loaded</span>
         </div>
         <div>
           <strong>
-            {posts.filter((post) => post.approval_status === "pending").length}
+            {counts.pending}
           </strong>
           <span>Pending</span>
         </div>
         <div>
           <strong>
-            {posts.filter((post) => post.approval_status === "approved").length}
+            {counts.approved}
           </strong>
           <span>Approved</span>
         </div>
         <div>
           <strong>
-            {posts.filter((post) => post.approval_status === "rejected").length}
+            {counts.rejected}
           </strong>
           <span>Rejected</span>
         </div>
@@ -223,7 +249,7 @@ export function ModerationDashboard() {
               key={item}
               onClick={() => setFilter(item)}
             >
-              {item[0].toUpperCase() + item.slice(1)}
+              {item[0].toUpperCase() + item.slice(1)} ({counts[item]})
             </button>
           ),
         )}
