@@ -12,15 +12,15 @@ async function request(path = "/", accept = "text/html") {
   );
 }
 
-test("server-renders the Quillora home page", async () => {
+test("server-renders the TFacts home page", async () => {
   const response = await request();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Quillora — Ideas worth reading \| Quillora<\/title>/i);
+  assert.match(html, /<title>TFacts — Ideas worth reading \| TFacts<\/title>/i);
   assert.match(html, /Stories that stay with you/i);
-  assert.match(html, /Quillora/i);
-  assert.doesNotMatch(html, /tfacts|codex-preview|Your site is taking shape|react-loading-skeleton/i);
+  assert.match(html, /TFacts/i);
+  assert.doesNotMatch(html, /quillora|codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
 test("serves crawl controls", async () => {
