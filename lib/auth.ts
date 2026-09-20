@@ -1,6 +1,6 @@
 import { API_URL } from "./api";
 
-export const AUTH_CHANGE_EVENT = "quillora-auth-change";
+export const AUTH_CHANGE_EVENT = "tfacts-auth-change";
 
 export type StoredUser = {
   id: number;
@@ -9,12 +9,37 @@ export type StoredUser = {
   role: string;
 };
 
+const STORAGE = {
+  access: "tfacts-access",
+  refresh: "tfacts-refresh",
+  user: "tfacts-user",
+} as const;
+
+const LEGACY_STORAGE = {
+  access: "quillora-access",
+  refresh: "quillora-refresh",
+  user: "quillora-user",
+} as const;
+
 let refreshPromise: Promise<string | null> | null = null;
+
+function migrateLegacySession(): void {
+  if (typeof window === "undefined") return;
+
+  for (const key of Object.keys(STORAGE) as Array<keyof typeof STORAGE>) {
+    if (!localStorage.getItem(STORAGE[key])) {
+      const legacyValue = localStorage.getItem(LEGACY_STORAGE[key]);
+      if (legacyValue) localStorage.setItem(STORAGE[key], legacyValue);
+    }
+    localStorage.removeItem(LEGACY_STORAGE[key]);
+  }
+}
 
 export function getStoredUser(): StoredUser | null {
   if (typeof window === "undefined") return null;
+  migrateLegacySession();
 
-  const value = localStorage.getItem("quillora-user");
+  const value = localStorage.getItem(STORAGE.user);
   if (!value) return null;
 
   try {
@@ -27,12 +52,14 @@ export function getStoredUser(): StoredUser | null {
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("quillora-access");
+  migrateLegacySession();
+  return localStorage.getItem(STORAGE.access);
 }
 
 export function hasAuthSession(): boolean {
   if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem("quillora-access") && getStoredUser());
+  migrateLegacySession();
+  return Boolean(localStorage.getItem(STORAGE.access) && getStoredUser());
 }
 
 export function storeAuthSession(
@@ -40,21 +67,23 @@ export function storeAuthSession(
   refresh: string,
   user: StoredUser,
 ): void {
-  localStorage.setItem("quillora-access", access);
-  localStorage.setItem("quillora-refresh", refresh);
-  localStorage.setItem("quillora-user", JSON.stringify(user));
+  localStorage.setItem(STORAGE.access, access);
+  localStorage.setItem(STORAGE.refresh, refresh);
+  localStorage.setItem(STORAGE.user, JSON.stringify(user));
+  clearLegacySession();
   notifyAuthChange();
 }
 
 export function updateStoredUser(user: StoredUser): void {
-  localStorage.setItem("quillora-user", JSON.stringify(user));
+  localStorage.setItem(STORAGE.user, JSON.stringify(user));
   notifyAuthChange();
 }
 
 export function clearAuthSession(): void {
-  localStorage.removeItem("quillora-access");
-  localStorage.removeItem("quillora-refresh");
-  localStorage.removeItem("quillora-user");
+  localStorage.removeItem(STORAGE.access);
+  localStorage.removeItem(STORAGE.refresh);
+  localStorage.removeItem(STORAGE.user);
+  clearLegacySession();
   notifyAuthChange();
 }
 
@@ -62,14 +91,15 @@ export async function authenticatedFetch(
   input: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const access = localStorage.getItem("quillora-access");
+  migrateLegacySession();
+  const access = localStorage.getItem(STORAGE.access);
   const response = await fetch(input, withBearerToken(init, access));
 
   if (response.status !== 401) return response;
 
   const refreshedAccess = await refreshAccessToken();
   if (!refreshedAccess) {
-    if (!localStorage.getItem("quillora-refresh")) redirectToLogin();
+    if (!localStorage.getItem(STORAGE.refresh)) redirectToLogin();
     return response;
   }
 
@@ -86,7 +116,8 @@ async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
-    const refresh = localStorage.getItem("quillora-refresh");
+    migrateLegacySession();
+    const refresh = localStorage.getItem(STORAGE.refresh);
     if (!refresh) {
       clearAuthSession();
       return null;
@@ -106,13 +137,19 @@ async function refreshAccessToken(): Promise<string | null> {
         return null;
       }
 
-      const payload = (await response.json()) as { access?: string };
+      const payload = (await response.json()) as {
+        access?: string;
+        refresh?: string;
+      };
       if (!payload.access) {
         clearAuthSession();
         return null;
       }
 
-      localStorage.setItem("quillora-access", payload.access);
+      localStorage.setItem(STORAGE.access, payload.access);
+      if (payload.refresh) {
+        localStorage.setItem(STORAGE.refresh, payload.refresh);
+      }
       notifyAuthChange();
       return payload.access;
     } catch {
@@ -127,12 +164,21 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
+function clearLegacySession(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(LEGACY_STORAGE.access);
+  localStorage.removeItem(LEGACY_STORAGE.refresh);
+  localStorage.removeItem(LEGACY_STORAGE.user);
+}
+
 function notifyAuthChange(): void {
-  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+  }
 }
 
 function redirectToLogin(): void {
-  if (window.location.pathname === "/login") return;
+  if (typeof window === "undefined" || window.location.pathname === "/login") return;
   const returnTo = `${window.location.pathname}${window.location.search}`;
   window.location.assign(`/login?next=${encodeURIComponent(returnTo)}`);
 }
