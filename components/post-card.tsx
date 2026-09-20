@@ -43,7 +43,7 @@ export function PostCard({
         <p>{contentExcerpt(post.content, 220)}</p>
         <div className="post-meta author-meta">
           <UserAvatar userId={post.author} size={30} />
-          <span>By {post.author_username || "Quillora writer"}</span>
+          <span>By {post.author_username || "TFacts writer"}</span>
           <span>{date(post.created_at)}</span>
           <span><Clock3 size={14} /> {readTime(post.content)} min read</span>
         </div>
@@ -62,7 +62,7 @@ export function PostCard({
       <p>{contentExcerpt(post.content)}</p>
       <div className="card-footer">
         <UserAvatar userId={post.author} size={25} />
-        <span>{post.author_username || "Quillora writer"}</span>
+        <span>{post.author_username || "TFacts writer"}</span>
         <span><Eye size={14} /> {post.view_count.toLocaleString()}</span>
         <SavePostButton postId={post.id} />
       </div>
