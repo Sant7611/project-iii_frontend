@@ -3,7 +3,7 @@ import { WriteForm } from "@/components/write-form";
 
 export const metadata: Metadata = {
   title: "Write a story",
-  description: "Publish a thoughtful story to the Quillora community.",
+  description: "Publish a thoughtful story to the TFacts community.",
   robots: { index: false, follow: true },
 };
 
@@ -22,7 +22,7 @@ export default async function WritePage({ searchParams }: { searchParams: Promis
       <div className="writer-wrap">
         <section className="writer-panel"><WriteForm editId={editId} /></section>
         <aside className="writer-tips">
-          <h2>A strong Quillora post is…</h2>
+          <h2>A strong TFacts post is…</h2>
           <ol>
             <li><strong>Focused.</strong> It has one clear reason to exist.</li>
             <li><strong>Readable.</strong> It respects the reader’s time.</li>
