@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: post.title,
     description: summary(post.content),
-    authors: [{ name: post.author_username || "Quillora" }],
+    authors: [{ name: post.author_username || "TFacts" }],
     alternates: { canonical },
     openGraph: { type: "article", title: post.title, description: summary(post.content), url: canonical, publishedTime: post.created_at, modifiedTime: post.updated_at, tags: post.tags, images: post.featured_img ? [{ url: post.featured_img }] : undefined },
   };
@@ -35,7 +35,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const comments = await getComments(post.id);
   const safeContent = parsePlateContent(post.content) ? post.content : sanitizeRichContent(post.content);
   const url = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/articles/${post.id}/${post.slug}`;
-  const jsonLd = { "@context": "https://schema.org", "@type": "Article", headline: post.title, description: summary(post.content), datePublished: post.created_at, dateModified: post.updated_at, author: { "@type": "Person", name: post.author_username || "Quillora writer" }, publisher: { "@type": "Organization", name: "Quillora" }, mainEntityOfPage: url, image: post.featured_img || undefined };
+  const jsonLd = { "@context": "https://schema.org", "@type": "Article", headline: post.title, description: summary(post.content), datePublished: post.created_at, dateModified: post.updated_at, author: { "@type": "Person", name: post.author_username || "TFacts writer" }, publisher: { "@type": "Organization", name: "TFacts" }, mainEntityOfPage: url, image: post.featured_img || undefined };
 
   return (
     <div className="article-layout">
@@ -46,7 +46,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <h1>{post.title}</h1>
           <p className="article-deck">{summary(post.content, 230)}</p>
           <div className="post-meta">
-            <span>By {post.author_username || "Quillora writer"}</span>
+            <span>By {post.author_username || "TFacts writer"}</span>
             <span>{new Date(post.created_at).toLocaleDateString("en", { month: "long", day: "numeric", year: "numeric" })}</span>
             <span><Clock3 size={14} /> {readTime(post.content)} min read</span>
             <span><Eye size={14} /> {post.view_count.toLocaleString()} views</span>
