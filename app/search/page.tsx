@@ -5,7 +5,7 @@ import { PostCard } from "@/components/post-card";
 import { searchPosts } from "@/lib/api";
 import type { Post } from "@/lib/types";
 
-export const metadata: Metadata = { title: "Search | Quillora", robots: { index: false, follow: true } };
+export const metadata: Metadata = { title: "Search | TFacts", robots: { index: false, follow: true } };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const query = ((await searchParams).q || "").trim();
@@ -21,7 +21,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <>
       <header className="page-heading search-heading">
         <span className="kicker"><Sparkles size={14} /> Backend relevance search</span>
-        <h1>{query ? `Results for “${query}”` : "Search Quillora"}</h1>
+        <h1>{query ? `Results for “${query}”` : "Search TFacts"}</h1>
         <p>Results are ranked by the project’s TF-IDF search algorithm using words from each post title and body.</p>
       </header>
 
