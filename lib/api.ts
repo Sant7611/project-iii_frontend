@@ -34,6 +34,7 @@ export function normalizePost(value: Partial<Post> & { author?: unknown; excerpt
     content: String(value.content || value.excerpt || ""),
     author: typeof value.author === "number" ? value.author : undefined,
     author_username: String(value.author_username || (typeof value.author === "string" ? value.author : "") || "TFacts writer"),
+    author_avatar: typeof value.author_avatar === "string" ? value.author_avatar : null,
     view_count: Number(value.view_count || 0),
     featured_img: value.featured_img || null,
     short_code: value.short_code || null,

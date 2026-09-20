@@ -6,6 +6,7 @@ import { API_URL } from "@/lib/api";
 import { authenticatedFetch, getStoredUser, hasAuthSession, updateStoredUser } from "@/lib/auth";
 import type { OwnerPost, Paginated, UserProfile } from "@/lib/types";
 import { PostCard } from "./post-card";
+import { AVATAR_CHANGE_EVENT, UserAvatar } from "./user-avatar";
 
 type Status = "all" | "approved" | "pending" | "rejected";
 
@@ -23,6 +24,9 @@ export function ProfileDashboard() {
   const [saveError, setSaveError] = useState("");
   const [requiresLogin, setRequiresLogin] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +74,12 @@ export function ProfileDashboard() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
 
   const visible = useMemo(
     () =>
@@ -133,6 +143,85 @@ export function ProfileDashboard() {
     }
   }
 
+  async function changeAvatar(file: File | undefined) {
+    if (!file || !profile || avatarBusy) return;
+
+    const preview = URL.createObjectURL(file);
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarPreview(preview);
+    setAvatarBusy(true);
+    setAvatarError("");
+    setMessage("");
+
+    const body = new FormData();
+    body.set("avatar", file);
+
+    try {
+      const response = await authenticatedFetch(`${API_URL}/profile/avatar/`, {
+        method: "PATCH",
+        headers: { Accept: "application/json" },
+        body,
+      });
+      const payload = await readResponse(response);
+      if (!response.ok) throw new Error(getApiError(payload));
+
+      const avatar = extractAvatar(payload);
+      setProfile((current) =>
+        current
+          ? { ...current, profile: { ...current.profile, avatar } }
+          : current,
+      );
+      setPosts((current) =>
+        current.map((post) => ({ ...post, author_avatar: avatar })),
+      );
+      setMessage("Profile image updated.");
+      window.dispatchEvent(new Event(AVATAR_CHANGE_EVENT));
+    } catch (reason) {
+      setAvatarError(
+        reason instanceof Error ? reason.message : "Profile image update failed.",
+      );
+    } finally {
+      URL.revokeObjectURL(preview);
+      setAvatarPreview(null);
+      setAvatarBusy(false);
+    }
+  }
+
+  async function removeAvatar() {
+    if (!profile?.profile?.avatar || avatarBusy) return;
+    if (!window.confirm("Remove your profile image?")) return;
+
+    setAvatarBusy(true);
+    setAvatarError("");
+    setMessage("");
+
+    try {
+      const response = await authenticatedFetch(`${API_URL}/profile/avatar/`, {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+      });
+      const payload = await readResponse(response);
+      if (!response.ok) throw new Error(getApiError(payload));
+
+      setProfile((current) =>
+        current
+          ? { ...current, profile: { ...current.profile, avatar: null } }
+          : current,
+      );
+      setPosts((current) =>
+        current.map((post) => ({ ...post, author_avatar: null })),
+      );
+      setMessage("Profile image removed.");
+      window.dispatchEvent(new Event(AVATAR_CHANGE_EVENT));
+    } catch (reason) {
+      setAvatarError(
+        reason instanceof Error ? reason.message : "Profile image removal failed.",
+      );
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
   async function deletePost(post: OwnerPost) {
     if (!window.confirm(`Delete “${post.title}”? This cannot be undone.`)) return;
 
@@ -187,14 +276,17 @@ export function ProfileDashboard() {
       </div>
     );
 
-  const avatar = profile.profile?.avatar;
+  const avatar = avatarPreview || profile.profile?.avatar;
+  const profileInitial = (profile.first_name || profile.username || "?").charAt(0).toUpperCase();
   return (
     <>
       <section className="profile-hero">
         <div className="profile-avatar">
           {avatar ? (
             <img src={avatar} alt={`${profile.username}'s avatar`} />
-          ) : null}
+          ) : (
+            <div className="profile-avatar-initial" aria-hidden="true">{profileInitial}</div>
+          )}
         </div>
         <div>
           <span className="kicker">Your curious corner</span>
@@ -334,6 +426,40 @@ export function ProfileDashboard() {
               <X size={20} />
             </button>
             <h2 id="edit-title">Edit profile</h2>
+            <div className="profile-avatar-editor">
+              <UserAvatar avatarUrl={avatar} username={profile.username} size={76} />
+              <div>
+                <strong>Profile image</strong>
+                <p>JPEG, PNG or WebP, up to 5 MB.</p>
+                <div className="profile-avatar-actions">
+                  <label className="button button-secondary">
+                    {avatarBusy ? "Updating…" : avatar ? "Change photo" : "Add photo"}
+                    <input
+                      className="sr-only"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={avatarBusy}
+                      onChange={(event) => {
+                        const file = event.currentTarget.files?.[0];
+                        event.currentTarget.value = "";
+                        void changeAvatar(file);
+                      }}
+                    />
+                  </label>
+                  {profile.profile?.avatar && (
+                    <button
+                      className="button button-secondary danger"
+                      type="button"
+                      onClick={() => void removeAvatar()}
+                      disabled={avatarBusy}
+                    >
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+                {avatarError && <p className="form-error" role="alert">{avatarError}</p>}
+              </div>
+            </div>
             <form className="form" onSubmit={save}>
               <div className="form-split">
                 <div className="field">
@@ -467,4 +593,11 @@ async function fetchAllPosts(firstUrl: string) {
     pages += 1;
   }
   return { posts, total };
+}
+
+function extractAvatar(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return null;
+  const record = payload as { data?: { avatar?: unknown }; avatar?: unknown };
+  const value = record.data?.avatar ?? record.avatar;
+  return typeof value === "string" ? value : null;
 }

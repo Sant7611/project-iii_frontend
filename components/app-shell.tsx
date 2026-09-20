@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {user ? (
             <>
               <Link href="/write" className="primary-pill"><PenLine size={16} /> Write</Link>
-              <Link href="/profile" className="avatar-button" aria-label="Profile"><UserAvatar userId={user.id} size={38} /></Link>
+              <Link href="/profile" className="avatar-button" aria-label="Profile"><UserAvatar userId={user.id} username={user.username} size={38} /></Link>
             </>
           ) : (
             <Link href="/login" className="primary-pill"><LogIn size={16} /> Sign in</Link>
