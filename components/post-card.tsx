@@ -42,7 +42,7 @@ export function PostCard({
         <h3><Link href={href} onClick={blockNavigation}>{post.title}</Link></h3>
         <p>{contentExcerpt(post.content, 220)}</p>
         <div className="post-meta author-meta">
-          <UserAvatar userId={post.author} size={30} />
+          <UserAvatar userId={post.author} avatarUrl={post.author_avatar} username={post.author_username} size={30} />
           <span>By {post.author_username || "TFacts writer"}</span>
           <span>{date(post.created_at)}</span>
           <span><Clock3 size={14} /> {readTime(post.content)} min read</span>
@@ -61,7 +61,7 @@ export function PostCard({
       <h3><Link href={href} onClick={blockNavigation}>{post.title}</Link></h3>
       <p>{contentExcerpt(post.content)}</p>
       <div className="card-footer">
-        <UserAvatar userId={post.author} size={25} />
+        <UserAvatar userId={post.author} avatarUrl={post.author_avatar} username={post.author_username} size={25} />
         <span>{post.author_username || "TFacts writer"}</span>
         <span><Eye size={14} /> {post.view_count.toLocaleString()}</span>
         <SavePostButton postId={post.id} />
