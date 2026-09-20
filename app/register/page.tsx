@@ -1,4 +1,25 @@
 import type { Metadata } from "next";
 import { AuthForm } from "@/components/auth-form";
-export const metadata: Metadata = { title: "Join tfacts", description: "Create a tfacts account and contribute clear technology facts.", robots: { index: false, follow: true } };
-export default function RegisterPage() { return <div className="auth-wrap"><section className="auth-art"><span className="brand">tfacts</span><h1>Curiosity looks good on you.</h1><p>Create your space to learn, save, discuss, and contribute.</p></section><section className="auth-panel"><h2>Join tfacts.</h2><p>A thoughtful technology community starts here.</p><AuthForm mode="register" /></section></div>; }
+
+export const metadata: Metadata = {
+  title: "Join Quillora",
+  description: "Create a Quillora account to publish, save, like, and discuss thoughtful stories.",
+  robots: { index: false, follow: true },
+};
+
+export default function RegisterPage() {
+  return (
+    <div className="auth-wrap">
+      <section className="auth-art">
+        <span className="quillora-brand"><span className="quillora-mark">Q</span><strong>Quillora</strong></span>
+        <h1>Your next good idea starts here.</h1>
+        <p>Build your reading space, discover better recommendations, and contribute to the community.</p>
+      </section>
+      <section className="auth-panel">
+        <h2>Join Quillora.</h2>
+        <p>Create your account and start reading with intention.</p>
+        <AuthForm mode="register" />
+      </section>
+    </div>
+  );
+}

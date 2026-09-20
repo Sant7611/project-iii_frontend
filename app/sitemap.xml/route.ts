@@ -1,5 +1,5 @@
 import { articleHref, getPosts } from "@/lib/api";
-function escape(value: string) { return value.replace(/[<>&'\"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[char]!); }
+function escape(value: string) { return value.replace(/[<>&'"]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[char]!); }
 export async function GET() {
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"; const { posts } = await getPosts();
   const urls = [`<url><loc>${escape(base)}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`, `<url><loc>${escape(`${base}/explore`)}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`, ...posts.map((post) => `<url><loc>${escape(`${base}${articleHref(post)}`)}</loc><lastmod>${new Date(post.updated_at).toISOString()}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>`)].join("");

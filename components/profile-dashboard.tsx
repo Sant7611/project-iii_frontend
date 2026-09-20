@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Camera, Edit3, FileText, LogIn, Trash2, X } from "lucide-react";
+import { Edit3, FileText, LogIn, Trash2, X } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { authenticatedFetch, getStoredUser, hasAuthSession, updateStoredUser } from "@/lib/auth";
 import type { OwnerPost, Paginated, UserProfile } from "@/lib/types";
@@ -84,13 +84,7 @@ export function ProfileDashboard() {
     if (!profile) return;
     setSaveError("");
     setMessage("");
-    const token = localStorage.getItem("tfacts-access");
-    if (!token) {
-      setSaveError("Your session has expired. Sign in again before saving.");
-      return;
-    }
     const form = new FormData(event.currentTarget);
-    const avatar = form.get("avatar");
     const body = {
       first_name: form.get("first_name"),
       last_name: form.get("last_name"),
@@ -112,28 +106,7 @@ export function ProfileDashboard() {
       const payload = await readResponse(response);
       if (!response.ok) throw new Error(getApiError(payload));
 
-      let updatedProfile = unwrapProfile(payload);
-      let avatarMessage = "";
-      if (avatar instanceof File && avatar.size) {
-        const avatarData = new FormData();
-        avatarData.set("profile.avatar", avatar);
-        const avatarResponse = await authenticatedFetch(
-          `${API_URL}/profile/me/`,
-          {
-            method: "PATCH",
-            headers: {
-              Accept: "application/json",
-            },
-            body: avatarData,
-          },
-        );
-        const avatarPayload = await readResponse(avatarResponse);
-        if (avatarResponse.ok) {
-          updatedProfile = unwrapProfile(avatarPayload);
-        } else {
-          avatarMessage = ` Your other details were saved, but the avatar was not: ${getApiError(avatarPayload)}`;
-        }
-      }
+      const updatedProfile = unwrapProfile(payload);
 
       setProfile(updatedProfile);
       const storedUser = getStoredUser();
@@ -146,7 +119,7 @@ export function ProfileDashboard() {
         });
       }
       setEditing(false);
-      setMessage(`Profile updated.${avatarMessage}`);
+      setMessage("Profile updated.");
     } catch (reason) {
       setSaveError(
         reason instanceof TypeError
@@ -222,9 +195,6 @@ export function ProfileDashboard() {
           {avatar ? (
             <img src={avatar} alt={`${profile.username}'s avatar`} />
           ) : null}
-          <span>
-            <Camera size={18} />
-          </span>
         </div>
         <div>
           <span className="kicker">Your curious corner</span>
@@ -290,7 +260,7 @@ export function ProfileDashboard() {
             <h2>Posts</h2>
           </div>
           <Link className="button button-primary" href="/write">
-            Write a fact
+            Write a story
           </Link>
         </div>
         <div className="filter-row" role="group" aria-label="Filter your posts">
@@ -315,7 +285,7 @@ export function ProfileDashboard() {
                 </span>
                 <PostCard
                   post={post}
-                  href={post.approval_status === "rejected" ? `/profile/posts/${post.id}` : undefined}
+                  href={post.approval_status !== "approved" ? `/profile/posts/${post.id}` : undefined}
                   actions={
                     <>
                       <Link
@@ -425,10 +395,6 @@ export function ProfileDashboard() {
                   name="address"
                   defaultValue={profile.profile?.address || ""}
                 />
-              </div>
-              <div className="field">
-                <label htmlFor="avatar">Avatar</label>
-                <input id="avatar" name="avatar" type="file" accept="image/*" />
               </div>
               {saveError && (
                 <div className="form-error" role="alert">
