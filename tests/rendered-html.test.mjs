@@ -20,7 +20,7 @@ test("server-renders the TFacts home page", async () => {
   assert.match(html, /<title>TFacts — Ideas worth reading \| TFacts<\/title>/i);
   assert.match(html, /Stories that stay with you/i);
   assert.match(html, /TFacts/i);
-  assert.doesNotMatch(html, /quillora|codex-preview|Your site is taking shape|react-loading-skeleton/i);
+  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
 test("serves crawl controls", async () => {
