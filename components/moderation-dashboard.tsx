@@ -255,7 +255,7 @@ export function ModerationDashboard() {
                   <header>
                     <span className="kicker">Full submission preview</span>
                     <h2>{post.title}</h2>
-                    <p>By {post.author_username || "Quillora writer"}</p>
+                    <p>By {post.author_username || "TFacts writer"}</p>
                   </header>
                   {post.featured_img && (
                     <img className="moderation-preview-image" src={post.featured_img} alt="" />
