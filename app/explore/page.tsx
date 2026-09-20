@@ -5,7 +5,7 @@ import { getPosts } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Explore stories",
-  description: "Browse approved Quillora stories by topic and discover new writers and ideas.",
+  description: "Browse approved TFacts stories by topic and discover new writers and ideas.",
   alternates: { canonical: "/explore" },
 };
 
